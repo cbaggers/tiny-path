@@ -13,16 +13,19 @@
         (ensure-directory-pathname pn))))
 
 (defun tpath-from-pathname (path)
-  (error "IMPLEMENT ME! ~a" path)
-  (tpath "foo"))
+  (destructuring-bind (flag . parts) (pathname-directory path)
+    (let ((nodes (if (eq flag :absolute)
+                     (list (%make-tiny-path-root-dir))
+                     (list))))
+      (loop :for part :in parts :do
+         (push (%make-tiny-path-dir :name part) nodes))
+      (when (pathname-name path)
+        (push (%make-tiny-path-file
+               :name (format nil "~a~@[.~a~]" (pathname-name path)
+                             (pathname-type path)))
+              nodes))
+      (make-path-from-nodes nodes))))
 
 ;;------------------------------------------------------------
-;; Helper functiosn that just call down to uiop and wrap
+;; Helper functions that just call down to uiop and wrap
 ;; results as tpaths
-
-(defun tpath-dirs (path &optional (recursive t))
-  (let ((pname (etypecase path
-                 (tpath (tpath-to-pathname path))
-                 (string (tpath-to-pathname (make-tpath path t)))
-                 (pathname path))))
-    (uiop:collect-sub*directories pname t recursive #'identity)))
