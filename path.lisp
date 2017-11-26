@@ -105,11 +105,25 @@
 
 ;;------------------------------------------------------------
 
+(declaim (inline ensure-tpath)
+         (ftype (function (t) tpath) ensure-tpath))
+(defun ensure-tpath (x)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
+  (etypecase x
+    (tiny-path x)
+    (string (make-tpath x))
+    (pathname (tpath-from-pathname x))))
+
+(defun tpath-p (x)
+  (tiny-path-p x))
+
 (defun tpath+ (a b)
-  (let ((nodes-a (tiny-path-nodes a))
-        (nodes-b (tiny-path-nodes b))
-        (len-a (tiny-path-length a))
-        (len-b (tiny-path-length b)))
+  (let* ((a (ensure-tpath a))
+         (b (ensure-tpath b))
+         (nodes-a (tiny-path-nodes a))
+         (nodes-b (tiny-path-nodes b))
+         (len-a (tiny-path-length a))
+         (len-b (tiny-path-length b)))
     (assert (not (tiny-path-node-terminal-p (first nodes-a))))
     (%make-tiny-path :nodes (append nodes-b nodes-a)
                      :absolute-p (tiny-path-absolute-p a)
@@ -117,7 +131,8 @@
 
 (defun tpath-pop (path &optional (n 1))
   (assert (>= n 1) () "Can't pop less that 1 node from path")
-  (let* ((nodes (tiny-path-nodes path))
+  (let* ((path (ensure-tpath path))
+         (nodes (tiny-path-nodes path))
          (len (tiny-path-length path))
          (remaining-nodes (nthcdr n nodes)))
     (values (when remaining-nodes
@@ -130,9 +145,11 @@
   (path+ path (make-path name dir)))
 
 (defun tpath-file-dir-p (path)
-  (typep (first (tiny-path-nodes path)) 'tiny-path-file))
+  (let ((path (ensure-tpath path)))
+    (typep (first (tiny-path-nodes path)) 'tiny-path-file)))
 
 (defun tpath-file-path-p (path)
-  (typep (first (tiny-path-nodes path)) 'tiny-path-file))
+  (let ((path (ensure-tpath path)))
+    (typep (first (tiny-path-nodes path)) 'tiny-path-file)))
 
 ;;------------------------------------------------------------

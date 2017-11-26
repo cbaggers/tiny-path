@@ -9,7 +9,8 @@
            :tpath-push
            :tpath-render
            :tpath-file-path-p
-           :tpath-to-pathname))
+           :tpath-to-pathname
+           :tpath-to-system))
 
 (uiop:define-package #:tiny-path
     (:use #:cl #:tiny-path.internals)
@@ -20,4 +21,5 @@
            :tpath-push
            :tpath-render
            :tpath-file-path-p
-           :tpath-to-pathname))
+           :tpath-to-pathname
+           :tpath-to-system))
