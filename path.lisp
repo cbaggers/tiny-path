@@ -1,8 +1,17 @@
-(in-package :tiny-path)
+(in-package :tiny-path.internals)
+
+;;------------------------------------------------------------
 
 ;; node - file or directory
 ;; file - a terminal node
 ;; dir - a non-terminal node
+
+;;------------------------------------------------------------
+
+(defvar *in-print-path* nil)
+(defvar *in-render-path* nil)
+
+;;------------------------------------------------------------
 
 (defclass path ()
   ;; nodes are stored in reverse order
@@ -25,8 +34,7 @@
   ((terminal :initform nil)
    (absolute-prefix :initform "/")))
 
-(defvar *in-print-path* nil)
-(defvar *in-render-path* nil)
+;;------------------------------------------------------------
 
 (defmethod print-object ((dir dir) stream)
   (with-slots (name seperator) dir
@@ -55,22 +63,41 @@
         (format stream name)
         (format stream "#<FILE ~s>" name))))
 
-(defun bad-path (str &optional dir)
-  (let* ((sub-strs (reverse (split-string str :separator '(#\/))))
-         (sub-strs (if (emptyp (first sub-strs))
-                       (if dir
-                           (rest sub-strs)
-                           (error "invalid trailing seperator"))
-                       sub-strs))
-         (nodes (mapcar (lambda (x) (make-instance 'dir :name x))
-                        (rest sub-strs)))
-         (nodes (cons (if dir
-                          (make-instance 'dir :name (first sub-strs))
-                          (make-instance 'file :name (first sub-strs)))
-                      nodes)))
-    (make-instance 'path :nodes nodes
-                   :absolute (typep (car (last nodes)) 'root-dir)
-                   :len (length nodes))))
+(defmethod print-object ((path path) stream)
+  (with-slots (nodes) path
+    (let ((*in-print-path* t))
+      (format stream "#<PATH \"~{~s~}\">" (reverse nodes)))))
+
+(defun render-path (path &optional stream)
+  (with-slots (nodes) path
+    (let ((*in-print-path* t)
+          (*in-render-path* t))
+      (format stream "~{~s~}" (reverse nodes)))))
+
+;;------------------------------------------------------------
+
+(defun make-path (str &optional dir)
+  (let ((split (split-string str :separator '(#\/))))
+    (assert split () "Empty relative paths are invalid")
+    (when (and (emptyp (first split)) (> (length split) 1))
+      (error "Cannot create an absolute path with #'make-path"))
+    (let* ((sub-strs (reverse split))
+           (sub-strs (if (emptyp (first sub-strs))
+                         (if dir
+                             (rest sub-strs)
+                             (error "invalid trailing seperator"))
+                         sub-strs))
+           (nodes (mapcar (lambda (x) (make-instance 'dir :name x))
+                          (rest sub-strs)))
+           (nodes (cons (if dir
+                            (make-instance 'dir :name (first sub-strs))
+                            (make-instance 'file :name (first sub-strs)))
+                        nodes)))
+      (make-instance 'path :nodes nodes
+                     :absolute (typep (car (last nodes)) 'root-dir)
+                     :len (length nodes)))))
+
+;;------------------------------------------------------------
 
 (defun path+ (a b)
   (with-slots ((nodes-a nodes)
@@ -90,15 +117,6 @@
             (first nodes))))
 
 (defun path-push (name path &optional dir)
-  (path+ path (bad-path name dir)))
+  (path+ path (make-path name dir)))
 
-(defmethod print-object ((path path) stream)
-  (with-slots (nodes) path
-    (let ((*in-print-path* t))
-      (format stream "#<PATH \"~{~s~}\">" (reverse nodes)))))
-
-(defun render-path (path &optional stream)
-  (with-slots (nodes) path
-    (let ((*in-print-path* t)
-          (*in-render-path* t))
-      (format stream "~{~s~}" (reverse nodes)))))
+;;------------------------------------------------------------
