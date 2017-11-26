@@ -14,8 +14,6 @@ Provides a very light abstraction for windows & unix paths.
 
 ## API
 
-## Why can't `#'make-tpath` make absolute paths
-
 ## Escaping
 
 tiny-path does not escape paths, the rules for this are os & shell specific and we arent touching that with a 10 foot pole.

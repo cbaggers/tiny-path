@@ -43,6 +43,10 @@
                        (terminal-p nil :type boolean :read-only t)))
   (seperator "/" :type string :read-only t))
 
+(defun %make-tpath-dir (name)
+  (assert (not (emptyp name)) ()
+          "Non root name cannot be empty")
+  (%make-tiny-path-dir :name name))
 
 (defstruct (tpath-root-dir
              (:constructor %make-tiny-path-root-dir)
@@ -85,22 +89,21 @@
                    :length (length nodes)))
 
 (defun make-tpath (str &optional dir)
-  (let ((split (split-string str :separator '(#\/))))
-    (assert split () "Empty relative paths are invalid")
-    (when (and (emptyp (first split)) (> (length split) 1))
-      (error "Cannot create an absolute path with #'make-path"))
-    (let* ((sub-strs (reverse split))
-           (sub-strs (if (emptyp (first sub-strs))
-                         (if dir
-                             (rest sub-strs)
-                             (error "invalid trailing seperator"))
-                         sub-strs))
-           (nodes (mapcar (lambda (x) (%make-tiny-path-dir :name x))
-                          (rest sub-strs)))
-           (nodes (cons (if dir
-                            (%make-tiny-path-dir :name (first sub-strs))
-                            (%make-tiny-path-file :name (first sub-strs)))
-                        nodes)))
+  (let* ((absolute (char= #\/ (char str 0)))
+         (str (if absolute (subseq str 1) str))
+         (split (split-string str :separator '(#\/))))
+    (assert (or split absolute) () "Empty relative paths are invalid")
+    (let ((nodes (if absolute
+                     (list (%make-tiny-path-root-dir))
+                     (list))))
+      (loop :for (current next) :on split :do
+         (if (string= current "")
+             (unless (and dir (not next))
+               (error "Non root directory name cannot be empty"))
+             (push (if (or next dir)
+                       (%make-tiny-path-dir :name current)
+                       (%make-tiny-path-file :name current))
+                   nodes)))
       (make-path-from-nodes nodes))))
 
 (defun tpath (str &optional dir)
@@ -143,6 +146,9 @@
                                :absolute-p (tpath-absolute-p path)
                                :length (- len n)))
             (subseq nodes 0 n))))
+
+(defun tpath-relative-p (path)
+  (not (tpath-absolute-p path)))
 
 (defun tpath-push (name path &optional dir)
   (path+ path (make-tpath name dir)))
