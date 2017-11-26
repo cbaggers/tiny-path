@@ -129,4 +129,7 @@
 (defun path-push (name path &optional dir)
   (path+ path (make-path name dir)))
 
+(defun file-path-p (path)
+  (typep (first (tiny-path-nodes path)) 'tiny-path-file))
+
 ;;------------------------------------------------------------

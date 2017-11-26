@@ -4,4 +4,11 @@
 
 ;;------------------------------------------------------------
 
+(defun tiny-path-to-pathname (path)
+  (let* ((str (render-path path))
+         (pn (pathname str)))
+    (if (file-path-p path)
+        pn
+        (ensure-directory-pathname pn))))
+
 ;;------------------------------------------------------------
