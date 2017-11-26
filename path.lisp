@@ -151,7 +151,7 @@
               (%make-tiny-path :nodes remaining-nodes
                                :absolute-p (tpath-absolute-p path)
                                :length (- len n)))
-            (subseq nodes 0 n))))
+            (make-path-from-nodes (subseq nodes 0 n)))))
 
 (defun tpath-relative-p (path)
   (not (tpath-absolute-p path)))
