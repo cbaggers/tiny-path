@@ -143,15 +143,16 @@
 
 (defun tpath-pop (path &optional (n 1))
   (assert (>= n 1) () "Can't pop less that 1 node from path")
-  (let* ((path (ensure-tpath path))
-         (nodes (tpath-nodes path))
-         (len (tpath-length path))
-         (remaining-nodes (nthcdr n nodes)))
-    (values (when remaining-nodes
-              (%make-tiny-path :nodes remaining-nodes
-                               :absolute-p (tpath-absolute-p path)
-                               :length (- len n)))
-            (make-path-from-nodes (subseq nodes 0 n)))))
+  (when path
+    (let* ((path (ensure-tpath path))
+           (nodes (tpath-nodes path))
+           (len (tpath-length path))
+           (remaining-nodes (nthcdr n nodes)))
+      (values (when remaining-nodes
+                (%make-tiny-path :nodes remaining-nodes
+                                 :absolute-p (tpath-absolute-p path)
+                                 :length (- len n)))
+              (make-path-from-nodes (subseq nodes 0 n))))))
 
 (defun tpath-relative-p (path)
   (not (tpath-absolute-p path)))
