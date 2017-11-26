@@ -2,7 +2,7 @@
 
 (uiop:define-package #:tiny-path.internals
     (:use #:cl #:uiop)
-  (:export :tiny-path
+  (:export :tpath
            :make-tpath
            :tpath+
            :tpath-pop
@@ -14,7 +14,7 @@
 
 (uiop:define-package #:tiny-path
     (:use #:cl #:tiny-path.internals)
-  (:export :tiny-path
+  (:export :tpath
            :make-tpath
            :tpath+
            :tpath-pop
