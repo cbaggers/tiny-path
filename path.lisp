@@ -109,12 +109,13 @@
                      :absolute (absolute-path-p a)
                      :len (+ len-a len-b)))))
 
-(defun path-pop (path)
+(defun path-pop (path &optional (n 1))
+  (assert (>= n 1) () "Can't pop less that 1 node from path")
   (with-slots (nodes len) path
-    (values (make-instance 'path :nodes (rest nodes)
+    (values (make-instance 'path :nodes (nthcdr n nodes)
                            :absolute (absolute-path-p path)
-                           :len (- len 1))
-            (first nodes))))
+                           :len (- len n))
+            (subseq nodes 0 n))))
 
 (defun path-push (name path &optional dir)
   (path+ path (make-path name dir)))

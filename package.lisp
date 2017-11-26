@@ -9,7 +9,7 @@
            :render-path))
 
 (uiop:define-package #:tiny-path
-    (:use #:tiny-path.internals)
+    (:use #:cl #:tiny-path.internals)
   (:export :make-path
            :path+
            :path-pop
