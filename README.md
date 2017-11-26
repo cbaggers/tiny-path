@@ -1,6 +1,6 @@
 # Tiny-Path
 
-Provides a very light abstraction for windows & unix paths.
+Was an experiment, dead now
 
 ## Terminology
 

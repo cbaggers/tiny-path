@@ -20,6 +20,11 @@
     (make-path-from-nodes
      (list (%make-tiny-path-root-dir :name name)))))
 
+;; Ah fuck, yeah I remember why I wasnt gonna have the user make absolute
+;; paths, as on different platforms it means different things. We have our
+;; agnostic path but then what does (tpath "/") mean on windows. Fook it
+
+
 ;;------------------------------------------------------------
 
 (defun tpath-to-system (name)
