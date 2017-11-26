@@ -2,16 +2,22 @@
 
 (uiop:define-package #:tiny-path.internals
     (:use #:cl #:uiop)
-  (:export :make-path
-           :path+
-           :path-pop
-           :path-push
-           :render-path))
+  (:export :tiny-path
+           :make-tpath
+           :tpath+
+           :tpath-pop
+           :tpath-push
+           :tpath-render
+           :tpath-file-path-p
+           :tpath-to-pathname))
 
 (uiop:define-package #:tiny-path
     (:use #:cl #:tiny-path.internals)
-  (:export :make-path
-           :path+
-           :path-pop
-           :path-push
-           :render-path))
+  (:export :tiny-path
+           :make-tpath
+           :tpath+
+           :tpath-pop
+           :tpath-push
+           :tpath-render
+           :tpath-file-path-p
+           :tpath-to-pathname))

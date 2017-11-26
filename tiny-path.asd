@@ -7,5 +7,6 @@
   :serial t
   :depends-on (:uiop)
   :components ((:file "package")
-               (:file "path")))
-
+               (:file "path")
+               (:file "pathnames")
+               (:file "common")))

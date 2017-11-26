@@ -1,14 +1,17 @@
 (in-package :tiny-path.internals)
 
-;; Functiosn for moving between pathnames & tiny-paths
+;; Functions for moving between pathnames & tiny-paths
 
 ;;------------------------------------------------------------
 
-(defun tiny-path-to-pathname (path)
-  (let* ((str (render-path path))
+(defun tpath-to-pathname (path)
+  (let* ((str (tpath-render path))
          (pn (pathname str)))
-    (if (file-path-p path)
+    (if (tpath-file-path-p path)
         pn
         (ensure-directory-pathname pn))))
+
+(defun tpath-from-pathname (path)
+  (error "IMPLEMENT ME! ~a" path))
 
 ;;------------------------------------------------------------
