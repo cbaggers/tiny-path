@@ -13,26 +13,54 @@
 
 ;;------------------------------------------------------------
 
-(defclass path ()
-  ;; nodes are stored in reverse order
-  ((nodes :initform nil :initarg :nodes)
-   (absolute :initarg :absolute :initform nil :reader absolute-path-p)
-   (len :initarg :len :reader path-length)))
+(deftype tiny-path-index ()
+  '(unsigned-byte 16))
 
-(defclass node ()
-  ((name :initarg :name :reader node-name)
-   (terminal :reader terminal-node-p)))
+(defstruct (tiny-path
+             (:constructor %make-tiny-path))
+  (nodes nil :type list :read-only t)
+  ;; these 2 slots are an optimization so we can avoid list walking
+  (absolute nil :type boolean :read-only t)
+  (length 0 :type tiny-path-index :read-only t))
 
-(defclass file (node)
-  ((terminal :initform t)))
+;; (defclass path ()
+;;   ;; nodes are stored in reverse order
+;;   ((nodes :initform nil :initarg :nodes)
+;;    (absolute :initarg :absolute :initform nil :reader absolute-path-p)
+;;    (len :initarg :len :reader path-length)))
 
-(defclass dir (node)
-  ((terminal :initform nil)
-   (seperator :initform "/")))
+(defstruct tiny-path-node
+  (name nil :type symbol :read-only t)
+  (terminal nil :type boolean :read-only t))
 
-(defclass root-dir (dir)
-  ((terminal :initform nil)
-   (absolute-prefix :initform "/")))
+;; (defclass node ()
+;;   ((name :initarg :name :reader node-name)
+;;    (terminal :reader terminal-node-p)))
+
+(defstruct (tiny-path-file
+             (:include tiny-path-node
+                       (terminal t :type boolean :read-only t))))
+
+;; (defclass file (node)
+;;   ((terminal :initform t)))
+
+(defstruct (tiny-path-dir
+             (:include tiny-path-node
+                       (terminal nil :type boolean :read-only t)))
+  (seperator "/" :type string :read-only t))
+
+;; (defclass dir (node)
+;;   ((terminal :initform nil)
+;;    (seperator :initform "/")))
+
+(defstruct (tiny-path-root-dir
+             (:include tiny-path-node
+                       (terminal nil :type boolean :read-only t)))
+  (absolute-prefix "/" :type string :read-only t))
+
+;; (defclass root-dir (dir)
+;;   ((terminal :initform nil)
+;;    (absolute-prefix :initform "/")))
 
 ;;------------------------------------------------------------
 
@@ -76,6 +104,14 @@
 
 ;;------------------------------------------------------------
 
+(defun make-path-from-nodes (nodes)
+  ;; What people extending tiny path will call from their constructors
+  (assert (not-some #'root-dir-p (butlast nodes)) ()
+          "Only the last node in the node list may be a root-dir")
+  (make-instance 'path :nodes nodes
+                 :absolute (typep (car (last nodes)) 'root-dir)
+                 :len (length nodes)))
+
 (defun make-path (str &optional dir)
   (let ((split (split-string str :separator '(#\/))))
     (assert split () "Empty relative paths are invalid")
@@ -93,9 +129,7 @@
                             (make-instance 'dir :name (first sub-strs))
                             (make-instance 'file :name (first sub-strs)))
                         nodes)))
-      (make-instance 'path :nodes nodes
-                     :absolute (typep (car (last nodes)) 'root-dir)
-                     :len (length nodes)))))
+      (make-path-from-nodes nodes))))
 
 ;;------------------------------------------------------------
 
