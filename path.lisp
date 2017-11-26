@@ -88,8 +88,9 @@
                    :absolute-p (tpath-root-dir-p (car (last nodes)))
                    :length (length nodes)))
 
-(defun make-tpath (str &optional dir)
-  (let* ((absolute (char= #\/ (char str 0)))
+(defun make-tpath (str &optional file)
+  (let* ((dir (not file))
+         (absolute (char= #\/ (char str 0)))
          (str (if absolute (subseq str 1) str))
          (split (split-string str :separator '(#\/))))
     (assert (or split absolute) () "Empty relative paths are invalid")
@@ -114,18 +115,18 @@
 
 (declaim (inline ensure-tpath)
          (ftype (function (t &optional t) tpath) ensure-tpath))
-(defun ensure-tpath (x &optional assume-dir-if-unknown)
+(defun ensure-tpath (x &optional assume-file-if-unknown)
   (declare (optimize (speed 3) (safety 1) (debug 1)))
   (etypecase x
     (tpath x)
-    (string (make-tpath x assume-dir-if-unknown))
+    (string (make-tpath x assume-file-if-unknown))
     (pathname (tpath-from-pathname x))))
 
 (defun tpath+ (a b)
   ;; when we ensure-tpath we have to assume dir if string given
   ;; otherwise will always fail
-  (let* ((a (ensure-tpath a t))
-         (b (ensure-tpath b))
+  (let* ((a (ensure-tpath a))
+         (b (ensure-tpath b t))
          (nodes-a (tpath-nodes a))
          (nodes-b (tpath-nodes b))
          (len-a (tpath-length a))
