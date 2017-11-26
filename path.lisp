@@ -131,7 +131,12 @@
          (nodes-b (tpath-nodes b))
          (len-a (tpath-length a))
          (len-b (tpath-length b)))
-    (assert (not (tpath-node-terminal-p (first nodes-a))))
+    (assert (not (tpath-node-terminal-p (first nodes-a))) ()
+            "The first argument to tpath+ cannot be a file path~%(tpath+ ~s ~s)"
+            (tpath-render a) (tpath-render b))
+    (assert (not (tpath-absolute-p b)) ()
+            "The second argument to tpath+ cannot be an absolute path~%(tpath+ ~s ~s)"
+            (tpath-render a) (tpath-render b))
     (%make-tiny-path :nodes (append nodes-b nodes-a)
                      :absolute-p (tpath-absolute-p a)
                      :length (+ len-a len-b))))
